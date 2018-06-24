@@ -48,13 +48,13 @@ func New() *Mail {
 }
 
 // Plain provide alternative message content
-func (m *Mail) Plain() BodyPart {
-	return m.plain
+func (m *Mail) Plain() *BodyPart {
+	return &m.plain
 }
 
 // HTML provide HTML message content
-func (m *Mail) HTML() BodyPart {
-	return m.html
+func (m *Mail) HTML() *BodyPart {
+	return &m.html
 }
 
 // To sets a list of recipient addresses.
