@@ -4,6 +4,7 @@ import "regexp"
 import "time"
 import "fmt"
 import "mime"
+import "bytes"
 
 type Mail struct {
 	html  BodyPart
@@ -170,4 +171,17 @@ func (m *Mail) Subject(sub string) {
  */
 func (m *Mail) String() string {
 	return fmt.Sprintf("&Mail{date: %q}", m.date)
+}
+
+/** Bytes returns the buffer containing all the RAW MIME data.
+ *
+ * Bytes is typically used with an API service such as Amazon SES that does
+ * not use an SMTP interface.
+ */
+func (m *Mail) Bytes() (*bytes.Buffer, error) {
+	buf, err := m.buildMime()
+	if err != nil {
+		return nil, err
+	}
+	return buf, nil
 }

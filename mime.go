@@ -3,6 +3,74 @@ package mimer
 import "io"
 import "fmt"
 import "mime/multipart"
+import "bytes"
+import "crypto/rand"
+
+/** randomBoundary returns a random hexadecimal string used for separating MIME
+ * parts.
+ *
+ * The returned string must be sufficiently random to prevent malicious users
+ * from performing content injection attacks.
+ */
+func randomBoundary() (string, error) {
+	buf := make([]byte, 30)
+	_, err := io.ReadFull(rand.Reader, buf)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", buf), nil
+}
+
+func (m *Mail) buildMime() (*bytes.Buffer, error) {
+	mb, err := randomBoundary()
+	if err != nil {
+		return nil, err
+	}
+
+	ab, err := randomBoundary()
+	if err != nil {
+		return nil, err
+	}
+
+	return m.buildMimeWithBoundaries(mb, ab)
+}
+
+/** buildMimeWithBoundaries creates the MIME message using mb and ab as MIME
+ * boundaries, and returns the generated MIME data as a buffer.
+ */
+func (m *Mail) buildMimeWithBoundaries(mb, ab string) (*bytes.Buffer, error) {
+	var buf bytes.Buffer
+
+	if err := m.writeHeaders(&buf); err != nil {
+		return nil, err
+	}
+
+	/* Start our multipart/mixed part */
+	mixed := multipart.NewWriter(&buf)
+	if err := mixed.SetBoundary(mb); err != nil {
+		return nil, err
+	}
+	defer mixed.Close()
+
+	fmt.Fprintf(&buf, "Content-Type: multipart/mixed;\r\n\tboundary=\"%s\"; charset=UTF-8\r\n\r\n", mixed.Boundary())
+
+	ctype := fmt.Sprintf("multipart/alternative;\r\n\tboundary=\"%s\"", ab)
+
+	altPart, err := mixed.CreatePart(textproto.MIMEHeader{"Content-Type": {ctype}})
+	if err != nil {
+		return nil, err
+	}
+
+	if err := m.writeBody(altPart, ab); err != nil {
+		return nil, err
+	}
+
+	if err := m.writeAttachments(mixed, lineSplitterBuilder{}); err != nil {
+		return nil, err
+	}
+
+	return &buf, nil
+}
 
 /** writeHeaders writes the Mime-Version, Date, Reply-To, From, To and Subject headers.
  */
