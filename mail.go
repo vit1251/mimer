@@ -47,32 +47,30 @@ func New() *Mail {
 	return mail
 }
 
-// PlainWriter write alternative message content.
-//
-//func PlainWriter(w io.Writer) {
-//	
-//}
+// Plain provide alternative message content
+func (m *Mail) Plain() BodyPart {
+	return m.plain
+}
 
-// HTMLWriter write HTML message content.
-//
-//func HTMLWriter(w io.Writer) {
-//	
-//}
+// HTML provide HTML message content
+func (m *Mail) HTML() BodyPart {
+	return m.html
+}
 
-/** To sets a list of recipient addresses.
- *
- * You can pass one or more addresses to this method, all of which are viewable to the recipients.
- *
- *	mail.To("dom@itsallbroken.com", "another@itsallbroken.com")
- *
- * or pass a slice of strings:
- *
- *	tos := []string{
- *		"one@itsallbroken.com",
- *		"two@itsallbroken.com"
- *	}
- *	mail.To(tos...)
- */
+// To sets a list of recipient addresses.
+//
+// You can pass one or more addresses to this method, all of which are viewable to the recipients.
+//
+// 	mail.To("dom@itsallbroken.com", "another@itsallbroken.com")
+//
+// or pass a slice of strings:
+//
+// 	tos := []string{
+// 		"one@itsallbroken.com",
+// 		"two@itsallbroken.com"
+// 	}
+// 	mail.To(tos...)
+//
 func (m *Mail) To(addrs ...string) {
 	m.toAddrs = []string{}
 	for _, addr := range addrs {
