@@ -29,13 +29,35 @@ type Mail struct {
  *
  */
 func New() *Mail {
+
+	/* Prepare default message content */
+	var textMessage BodyPart
+	textMessage.Set("No content.")
+	var htmlMessage BodyPart
+	htmlMessage.Set("No content.")
+
+	/* Create message */
 	mail := &Mail{
 		trimRegex:      regexp.MustCompile("\r?\n"),
 		writeBccHeader: false,
 		date:           time.Now().Format(time.RFC1123Z),
+		html:           htmlMessage,
+		plain:          textMessage,
 	}
 	return mail
 }
+
+// PlainWriter write alternative message content.
+//
+//func PlainWriter(w io.Writer) {
+//	
+//}
+
+// HTMLWriter write HTML message content.
+//
+//func HTMLWriter(w io.Writer) {
+//	
+//}
 
 /** To sets a list of recipient addresses.
  *
