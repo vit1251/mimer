@@ -7,12 +7,11 @@ import "bytes"
 import "crypto/rand"
 import "net/textproto"
 
-/** randomBoundary returns a random hexadecimal string used for separating MIME
- * parts.
- *
- * The returned string must be sufficiently random to prevent malicious users
- * from performing content injection attacks.
- */
+// randomBoundary returns a random hexadecimal string used for separating MIME
+// parts.
+//
+// The returned string must be sufficiently random to prevent malicious users
+// from performing content injection attacks.
 func randomBoundary() (string, error) {
 	buf := make([]byte, 30)
 	_, err := io.ReadFull(rand.Reader, buf)
@@ -36,9 +35,8 @@ func (m *Mail) buildMime() (*bytes.Buffer, error) {
 	return m.buildMimeWithBoundaries(mb, ab)
 }
 
-/** buildMimeWithBoundaries creates the MIME message using mb and ab as MIME
- * boundaries, and returns the generated MIME data as a buffer.
- */
+// buildMimeWithBoundaries creates the MIME message using mb and ab as MIME
+// boundaries, and returns the generated MIME data as a buffer.
 func (m *Mail) buildMimeWithBoundaries(mb, ab string) (*bytes.Buffer, error) {
 	var buf bytes.Buffer
 
@@ -73,8 +71,7 @@ func (m *Mail) buildMimeWithBoundaries(mb, ab string) (*bytes.Buffer, error) {
 	return &buf, nil
 }
 
-/** writeHeaders writes the Mime-Version, Date, Reply-To, From, To and Subject headers.
- */
+// writeHeaders writes the Mime-Version, Date, Reply-To, From, To and Subject headers.
 func (m *Mail) writeHeaders(buf io.Writer) error {
 
 	if _, err := buf.Write([]byte(m.fromHeader())); err != nil {
@@ -110,10 +107,7 @@ func (m *Mail) writeHeaders(buf io.Writer) error {
 	return nil
 }
 
-
-/** fromHeader returns a correctly formatted From header, optionally with a name
- * component.
- */
+// fromHeader returns a correctly formatted From header, optionally with a name component.
 func (m *Mail) fromHeader() string {
 
 	if m.fromName == "" {
@@ -123,12 +117,36 @@ func (m *Mail) fromHeader() string {
 	return fmt.Sprintf("From: %s <%s>\r\n", m.fromName, m.fromAddr)
 }
 
-/** writeBody writes the text/plain and text/html mime parts.
- */
+// writeBody writes the text/plain and text/html mime parts.
 func (m *Mail) writeBody(w io.Writer, boundary string) error {
 
 	alt := multipart.NewWriter(w)
 	defer alt.Close()
+
+	if err := alt.SetBoundary(boundary); err != nil {
+		return err
+	}
+
+	var err error
+	writePart := func(ctype string, data []byte) {
+
+		if len(data) == 0 || err != nil {
+			return
+		}
+
+		c := fmt.Sprintf("%s; charset=UTF-8", ctype)
+
+		var part io.Writer
+		part, err = alt.CreatePart(textproto.MIMEHeader{"Content-Type": {c}})
+		if err != nil {
+			return
+		}
+
+		_, err = part.Write(data)
+	}
+
+	writePart("text/plain", m.plain.Bytes())
+	writePart("text/html", m.html.Bytes())
 
 	return nil
 }
