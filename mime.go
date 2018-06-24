@@ -61,4 +61,5 @@ func (m *Mail) writeBody(w io.Writer, boundary string) error {
 	alt := multipart.NewWriter(w)
 	defer alt.Close()
 
+	return nil
 }
