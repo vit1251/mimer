@@ -5,6 +5,7 @@ import "fmt"
 import "mime/multipart"
 import "bytes"
 import "crypto/rand"
+import "net/textproto"
 
 /** randomBoundary returns a random hexadecimal string used for separating MIME
  * parts.
@@ -65,9 +66,9 @@ func (m *Mail) buildMimeWithBoundaries(mb, ab string) (*bytes.Buffer, error) {
 		return nil, err
 	}
 
-	if err := m.writeAttachments(mixed, lineSplitterBuilder{}); err != nil {
-		return nil, err
-	}
+//	if err := m.writeAttachments(mixed, lineSplitterBuilder{}); err != nil {
+//		return nil, err
+//	}
 
 	return &buf, nil
 }
