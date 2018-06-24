@@ -16,7 +16,7 @@ type Mail struct {
 	fromAddr       string
 	fromName       string
 	replyTo        string
-	attachments    []attachment
+	attachments    []Attachment
 	trimRegex      *regexp.Regexp
 	writeBccHeader bool
 	date string
