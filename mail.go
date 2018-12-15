@@ -1,10 +1,13 @@
 package mimer
 
-import "regexp"
-import "time"
-import "fmt"
-import "mime"
-import "bytes"
+import (
+	"regexp"
+	"time"
+	"fmt"
+	"mime"
+	"bytes"
+	"io"
+)
 
 type Mail struct {
 	html  BodyPart
@@ -204,4 +207,14 @@ func (m *Mail) Bytes() (*bytes.Buffer, error) {
 		return nil, err
 	}
 	return buf, nil
+}
+
+/**
+ */
+func (m *Mail) WriteTo(w io.Writer) (n int64, err error) {
+	buf, err := m.buildMime()
+	if err != nil {
+		return 0, err
+	}
+	return io.Copy(w, buf)
 }
